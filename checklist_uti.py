@@ -28,16 +28,31 @@ def main():
 
     for i in range(1, num_pacientes + 1):
         st.header(f"Paciente {i}")
-        dados_pacientes[f"Paciente {i}"] = {}
+        nome_paciente = st.text_input(f"Nome do Paciente (Leito {i}):", key=f"nome_paciente_{i}")
+        resumo_caso = st.text_area(f"Resumo do Caso (Leito {i}):", height=150, key=f"resumo_caso_{i}")
+
+        dados_pacientes[f"Paciente {i}"] = {
+            "Nome": nome_paciente,
+            "Resumo do Caso": resumo_caso,
+            "Checklist": {}
+        }
+
         for item in explicacoes:
             marcado = st.checkbox(item, key=f"paciente_{i}_{item}")
             if marcado:
                 with st.expander("O que perguntar à equipe?", expanded=False):
                     st.write(explicacoes[item])
-            dados_pacientes[f"Paciente {i}"][item] = marcado
+            dados_pacientes[f"Paciente {i}"]["Checklist"][item] = marcado
 
     if st.button("Salvar Checklist"):
-        df = pd.DataFrame.from_dict(dados_pacientes, orient='index')
+        data_to_save = {}
+        for paciente, data in dados_pacientes.items():
+            data_to_save[paciente] = {
+                "Nome": data["Nome"],
+                "Resumo do Caso": data["Resumo do Caso"],
+                "Checklist": data["Checklist"]
+            }
+        df = pd.DataFrame.from_dict(data_to_save, orient='index')
         st.subheader("Dados do Checklist Salvos:")
         st.dataframe(df)
         st.success("Checklist salvo com sucesso!")
